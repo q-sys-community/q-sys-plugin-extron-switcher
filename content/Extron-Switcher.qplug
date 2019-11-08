@@ -1,0 +1,553 @@
+-- The PluginInfo header contains some important information that Q-Sys Designer will parse when compiled.
+-- Id is a unique ID given to every plugin. While we typically use randomly generated UUID's, you can use anything here so long as it is unique
+--
+
+PluginInfo = {
+    Name = "Extron~Switcher (0.0.0.0-master)", -- The tilde here indicates folder structure in the Shematic Elements pane
+    Version = "0.0.0.0-master",
+    Id = "qsysc.extron.switcher.0.0.0.0-master", -- show this is just a unique id. Show some commented out 'fun' unique ids
+    Description = "Control for Extron range of Video Switchers (All models)",
+    ShowDebug = true,
+    Author = "Solo Works London"
+}
+
+-- Once you've drawn your plugin in Designer, you can determine what colors you use a lot. Save yourself some time by putting them in a table, and then simply calling them later.
+local Colors = {
+    White = {255, 255, 255},
+    Black = {0, 0, 0},
+    Red = {255, 0, 0},
+    Green = {0, 255, 0}
+}
+
+local MaxSources = 8
+-- We can let users determine some of the plugin properties by exposing them here
+-- While this function can be very useful, it is completely optional and not always needed.
+-- If no Properties are set here, only the position and fill properties of your plugin will show in the Properties pane
+function GetProperties()
+    props = {
+        {
+            Name = "IP Address",
+            Type = "string",
+            Value = "127.0.0.1"
+        },
+        {
+            Name = "Source Count",
+            Type = "integer",
+            Min = 2,
+            Max = MaxSources,
+            Value = 2
+        },
+        {
+            Name = "Debug",
+            Type = "boolean",
+            Value = "false"
+        }
+    }
+    return props
+end
+
+-- The below function is optional (like GetProperties() is), but it can allow further customization of what users can and can't do with your plugin.
+-- In this example, when Model 1 is selected in the properties pane, the ability to modify some of the properties will be hidden, only allowing customization with Model 2
+-- Another application of this is if you have different input/output types for different models, and want those properties to be dynamic in the Properties pane
+function RectifyProperties(props)
+    return props
+end
+
+-- The below function is where you will populate the controls for your plugin.
+-- If you've written some of the Runtime code already, simply use the control names you populated in Text Controller/Control Script, and use their Properties to inform the values here
+-- ControlType can be Button, Knob, Indicator or Text
+-- ButtonType ( ControlType == Button ) can be Momentary, Toggle or Trigger
+-- IndicatorType ( ControlType == Indicator ) can be Led, Meter, Text or Status
+-- ControlUnit ( ControlType == Knob ) can be Hz, Float, Integer, Pan, Percent, Position or Seconds
+function GetControls(props)
+    ctls = {
+        -- System Pins
+        {
+            Name = "Online",
+            ControlType = "Indicator",
+            IndicatorType = "Led",
+            PinStyle = "Output",
+            Count = 1,
+            UserPin = true
+        },
+        {
+            Name = "IPAddress",
+            ControlType = "Indicator",
+            IndicatorType = "Text",
+            PinStyle = "Both",
+            Count = 1,
+            UserPin = true
+        },
+        {
+            Name = "Model",
+            ControlType = "Indicator",
+            IndicatorType = "Text",
+            PinStyle = "Output",
+            Count = 1,
+            UserPin = true
+        },
+        {
+            Name = "PartNo",
+            ControlType = "Indicator",
+            IndicatorType = "Text",
+            PinStyle = "Output",
+            Count = 1,
+            UserPin = true
+        },
+        {
+            Name = "FirmwareVersion",
+            ControlType = "Indicator",
+            IndicatorType = "Text",
+            PinStyle = "Output",
+            Count = 1,
+            UserPin = true
+        },
+        {
+            Name = "Temperature",
+            ControlType = "Knob",
+            IndicatorType = "Integer",
+            PinStyle = "Output",
+            Count = 1,
+            UserPin = true
+        },
+        -- Input Ports - Signal Presence
+        {
+            Name = "SourceSignal",
+            ControlType = "Indicator",
+            IndicatorType = "Led",
+            PinStyle = "Output",
+            Count = MaxSources,
+            UserPin = true
+        },
+        -- Output Ports
+        {
+            Name = "SourceActiveVal",
+            ControlType = "Knob",
+            IndicatorType = "Integer",
+            Min = 1,
+            Max = MaxSources,
+            PinStyle = "Output",
+            UserPin = true
+        },
+        {
+            Name = "SourceActive",
+            ControlType = "Indicator",
+            IndicatorType = "Led",
+            PinStyle = "Output",
+            Count = MaxSources,
+            UserPin = true
+        },
+        -- Source Select Value
+        {
+            Name = "SourceSelectVal",
+            ControlType = "Knob",
+            ControlUnit = "Integer",
+            Min = 1,
+            Max = MaxSources,
+            PinStyle = "Input",
+            UserPin = true
+        },
+        -- Sources Select Buttons
+        {
+            Name = "SourceSelectBtn",
+            ControlType = "Button",
+            ButtonType = "Momentary",
+            PinStyle = "Input",
+            Count = MaxSources,
+            UserPin = true
+        }
+    }
+    return ctls
+end
+
+-- Variable holding Page Names for ease
+local pagenames = {"Display"}
+
+-- This function allows you to populate pages in your plugin.
+function GetPages(props)
+    pages = {}
+    table.insert(pages, {name = pagenames[1]})
+    return pages
+end
+
+-- This function allows you to layout pages in your plugin.
+function GetControlLayout(props)
+    local layout = {}
+
+    graphics = {
+        {
+            Type = "GroupBox", -- This is the overall groupbox that will give the plugin a more 'contained' look
+            Text = "Info",
+            HTextAlign = "Left",
+            Fill = Colors.White,
+            CornerRadius = 8,
+            StrokeColor = Colors.Black,
+            StrokeWidth = 1,
+            Position = {0, 0},
+            Size = {220, 140} -- The width of the main GroupBox is dependent on how many channels the user specified. More channels means a wider group box
+        },
+        {
+            Type = "Text",
+            Text = "Online:",
+            Font = "Roboto",
+            FontSize = 12,
+            FontStyle = "Bold",
+            HTextAlign = "Right",
+            Color = Colors.Black,
+            Position = {0, 0},
+            Size = {100, 20}
+        },
+        {
+            Type = "Text",
+            Text = "IP Address:",
+            Font = "Roboto",
+            FontSize = 12,
+            FontStyle = "Bold",
+            HTextAlign = "Right",
+            Color = Colors.Black,
+            Position = {0, 20},
+            Size = {100, 20}
+        },
+        {
+            Type = "Text",
+            Text = "Model:",
+            Font = "Roboto",
+            FontSize = 12,
+            FontStyle = "Bold",
+            HTextAlign = "Right",
+            Color = Colors.Black,
+            Position = {0, 40},
+            Size = {100, 20}
+        },
+        {
+            Type = "Text",
+            Text = "Part Number:",
+            Font = "Roboto",
+            FontSize = 12,
+            FontStyle = "Bold",
+            HTextAlign = "Right",
+            Color = Colors.Black,
+            Position = {0, 60},
+            Size = {100, 20}
+        },
+        {
+            Type = "Text",
+            Text = "Software:",
+            Font = "Roboto",
+            FontSize = 12,
+            FontStyle = "Bold",
+            HTextAlign = "Right",
+            Color = Colors.Black,
+            Position = {0, 80},
+            Size = {100, 20}
+        },
+        {
+            Type = "Text",
+            Text = "Temp(°C):",
+            Font = "Roboto",
+            FontSize = 12,
+            FontStyle = "Bold",
+            HTextAlign = "Right",
+            Color = Colors.Black,
+            Position = {0, 100},
+            Size = {100, 20}
+        },
+        {
+            Type = "GroupBox",
+            Text = "Source",
+            HTextAlign = "Left",
+            Fill = Colors.White,
+            CornerRadius = 8,
+            StrokeColor = Colors.Black,
+            StrokeWidth = 1,
+            Position = {0, 150},
+            Size = {220, 200}
+        }
+    }
+
+    -- System
+    layout["Online"] = {
+        PrettyName = "System~Online",
+        Style = "Indicator",
+        Color = {0, 255, 0},
+        Position = {100, 00},
+        Size = {20, 20}
+    }
+    layout["IPAddress"] = {
+        PrettyName = "System~IP Address",
+        Style = "TextBox",
+        Position = {100, 20},
+        Size = {100, 20}
+    }
+    layout["Model"] = {
+        PrettyName = "System~Model Name",
+        Style = "Text",
+        Position = {100, 40},
+        Size = {100, 20}
+    }
+    layout["PartNo"] = {
+        PrettyName = "System~Part Number",
+        Style = "Text",
+        Position = {100, 60},
+        Size = {100, 20}
+    }
+    layout["FirmwareVersion"] = {
+        PrettyName = "System~Firmware Version",
+        Style = "Text",
+        Position = {100, 80},
+        Size = {100, 20}
+    }
+    layout["Temperature"] = {
+        PrettyName = "System~Temperature",
+        Style = "Text",
+        Color = {223, 0, 36},
+        Position = {100, 100},
+        Size = {100, 20}
+    }
+    -- Source Ports
+    for s = 1, props["Source Count"].Value do
+        -- Source Select
+        layout["SourceSelectBtn " .. s] = {
+            PrettyName = string.format("Source%02i Select", s),
+            Style = "Button",
+            --Color = {0, 255, 0},
+            Position = {10, 155 + (s * 20)},
+            Size = {20, 20}
+        }
+        -- Source Signal
+        layout["SourceSignal " .. s] = {
+            PrettyName = string.format("Source%02i Signal", s),
+            Style = "Indicator",
+            Color = {0, 255, 0},
+            Position = {35, 155 + (s * 20)},
+            Size = {20, 20}
+        }
+        -- Source Signal
+        layout["SourceActive " .. s] = {
+            PrettyName = string.format("Source%02i Active", s),
+            Style = "Indicator",
+            Color = {0, 255, 0},
+            Position = {150, 155 + (s * 20)},
+            Size = {20, 20}
+        }
+        -- Add Label
+        table.insert(
+            graphics,
+            {
+                Type = "Text",
+                Text = string.format("Source%02i", s),
+                Font = "Roboto",
+                FontSize = 12,
+                FontStyle = "Bold",
+                HTextAlign = "Left",
+                Color = Colors.Black,
+                Position = {60, 155 + (s * 20)},
+                Size = {75, 20}
+            }
+        )
+    end
+
+    -- Active Source
+    layout["SourceSelectVal"] = {
+        PrettyName = string.format("Source"),
+        Style = "Text",
+        Color = {223, 0, 36},
+        Position = {175, 155},
+        Size = {36, 16}
+    }
+
+    return layout, graphics
+end
+
+if Controls then
+    -- Local Structure for holding State
+    Extron = {
+        Host = "",
+        Port = 23,
+        Rx = ""
+    }
+
+    -- Easy Debug Out
+    function debug(s)
+        if Properties["Debug"].Value == true then
+            print(s)
+        end
+    end
+    -- Build TCP Client
+    conn = TcpSocket.New()
+    conn.ReadTimeout = 0
+    conn.WriteTimeout = 0
+    conn.ReconnectTimeout = 5
+
+    -- Create and setup the Communications Timeout
+    timerComms = Timer.New()
+    timerComms.EventHandler = function(timer)
+        timer:Stop()
+        Controls.Online.Boolean = false
+        debug("Connection Timed Out")
+        conn:Disconnect()
+        fnConnect()
+    end
+
+    -- Create and setup Polling
+    timerPoll = Timer.New()
+
+    timerPoll.EventHandler = function(timer)
+        fnPoll()
+    end
+
+    function fnInitPoll(activate)
+        timerPoll:Stop()
+        if activate == true then
+            timerPoll:Start(20)
+        end
+    end
+
+    function fnPoll()
+        -- Poll the Info
+        fnSend("N")
+    end
+
+    -- Data Sending Helper Function
+    function fnSend(cmd)
+        -- Send to device
+        debug("-->Extron::" .. cmd)
+        conn:Write(cmd)
+        -- Reset Polling
+        fnInitPoll(true)
+    end
+
+    function fnInit()
+        -- Set Verbose Mode to full comms
+        fnSend(string.char(27) .. "3CV" .. string.char(10))
+    end
+
+    -- Setup Utility Callbacks as required
+    conn.Connected = function(conn)
+        debug("TCP socket is Connected")
+        -- Clear States (Not pretty, but works for now)
+        Controls["SourceSignal"][1].Value = false
+        Controls["SourceSignal"][2].Value = false
+        Controls["SourceSignal"][3].Value = false
+        Controls["SourceSignal"][4].Value = false
+        Controls["SourceSignal"][5].Value = false
+        Controls["SourceSignal"][6].Value = false
+        Controls["SourceSignal"][7].Value = false
+        Controls["SourceSignal"][8].Value = false
+        -- Set a timer to wait for connection to establish
+        Timer.CallAfter(fnInit, 1)
+    end
+    conn.Reconnect = function(conn)
+        debug("TCP socket is Reconnecting")
+    end
+    conn.Closed = function(conn)
+        debug("TCP socket was closed by the remote end")
+        fnInitPoll(false)
+    end
+    conn.Error = function(conn, err)
+        debug("TCP socket had an error ::")
+        debug(err)
+    end
+    conn.Timeout = function(conn, err)
+        debug("TCP socket had an timeout ::")
+        debug(err)
+    end
+
+    -- Helper Function - Open TCP Connection
+    function fnConnect()
+        -- Open Connection
+        conn:Connect(Extron.Host, Extron.Port)
+        debug("TCP socket is Connecting")
+        -- Set IP address value
+        if Controls.IPAddress then
+            Controls.IPAddress.String = Extron.Host .. ":" .. Extron.Port
+        end
+    end
+
+    local function split(str, delim)
+        local result = {}
+        for part in str:gmatch("[^" .. delim .. "]+") do
+            result[#result + 1] = part
+        end
+        return result
+    end
+
+    -- Setup Data Callbacks as required
+    conn.Data = function(conn)
+        -- Read out lines from the buffer
+        line = conn:ReadLine(TcpSocket.EOL.Any)
+        while (line ~= nil) do
+            -- Print Line
+            debug(line)
+            if line:sub(1, 3) == "Pno" then
+                Controls.PartNo.String = line:sub(4, -1)
+                timerComms:Stop()
+                if Controls.Online then -- Check for when developing in a Control Script block
+                    Controls.Online.Boolean = true
+                end
+                timerComms:Start(30)
+            elseif line:sub(1, 3) == "Vrb" then
+                -- Get Meta Data
+                fnSend("N")
+                fnSend("Q")
+                fnSend("1I")
+                fnSend("!")
+                -- Start Polling
+                fnPoll()
+                -- get Initial Signal State
+                fnSend(string.char(27) .. "LS" .. string.char(10))
+            elseif line:sub(1, 5) == "Inf01" then
+                Controls.Model.String = line:sub(7, -1)
+            elseif line:sub(1, 2) == "In" then
+                Controls.SourceActiveVal.Value = line:sub(3, 3)
+                for i = 1, MaxSources do
+                    Controls["SourceActive"][i].Value = (Controls.SourceActiveVal.Value == i)
+                end
+            elseif line:sub(1, 5) == "Ver01" then
+                Controls.FirmwareVersion.String = line:sub(7, -1)
+            elseif line:sub(1, 3) == "Sig" then
+                -- Split up the Signals
+                for p, data in ipairs(split(line:sub(4, -3), " ")) do
+                    Controls["SourceSignal"][p].Value = (data == "1")
+                end
+
+            -- Output Status is last digit
+            --Controls.VideoOutputSignal.Boolean = (line:sub(12, 12) == "1")
+            end
+            -- Get New Line
+            line = conn:ReadLine(TcpSocket.EOL.Any)
+        end
+    end
+
+    -- Set IP address from Properties if present
+    if Properties then
+        if Properties["IP Address"].Value ~= "" then
+            Extron.Host = Properties["IP Address"].Value
+            fnConnect()
+        else
+            debug("IP Address Property Not Set")
+        end
+    end
+
+    -- Loop through all Controls and setup Event Handlers
+    for k, v in pairs(Controls) do
+        -- Setup anything with "Source..."
+        if k == "SourceSelectVal" then
+            v.EventHandler = function(changedControl)
+                -- Debug Out
+                debug("Switch " .. changedControl.Value)
+                -- Send command
+                fnSend(math.tointeger(changedControl.Value) .. "!")
+            end
+        elseif k == "SourceSelectBtn" then
+            for s = 1, MaxSources do
+                v[s].EventHandler = function(changedControl)
+                    -- Debug Out
+                    debug("Switch " .. s)
+                    -- Send command
+                    fnSend(math.tointeger(s) .. "!")
+                end
+            end
+        end
+    end
+end
