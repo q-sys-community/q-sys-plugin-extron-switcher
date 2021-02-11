@@ -77,7 +77,7 @@ function GetControls(props)
         {
             Name = "ip_address",
             ControlType = "Indicator",
-            IndicatorType = "Text",
+            IndicatorType = "Status",
             PinStyle = "Both",
             Count = 1,
             UserPin = true
@@ -85,7 +85,7 @@ function GetControls(props)
         {
             Name = "model",
             ControlType = "Indicator",
-            IndicatorType = "Text",
+            IndicatorType = "Status",
             PinStyle = "Output",
             Count = 1,
             UserPin = true
@@ -113,6 +113,13 @@ function GetControls(props)
             UserPin = true
         },
         {
+            Name = "av_mute",
+            ControlType = "Button",
+            ButtonType = "Toggle",
+            PinStyle = "Both",
+            UserPin = true
+        },
+        {
             Name = "video_mute",
             ControlType = "Button",
             ButtonType = "Toggle",
@@ -121,6 +128,13 @@ function GetControls(props)
         },
         {
             Name = "audio_mute",
+            ControlType = "Button",
+            ButtonType = "Toggle",
+            PinStyle = "Both",
+            UserPin = true
+        },
+        {
+            Name = "sync_mute",
             ControlType = "Button",
             ButtonType = "Toggle",
             PinStyle = "Both",
@@ -166,23 +180,34 @@ function GetControlLayout(props)
 
     input_count = string.match(props["Model"].Value, "SW(%d+)")
 
-    local sources_groupbox_position = {0, 144}
-    local sources_groupbox_size = {224, 212}
+    local title_size = {224,32}
     local btn_size = {32, 24}
-
-    sources_groupbox_size[2] = (2.5 * btn_size[2] + (input_count * btn_size[2]))
+    local sources_groupbox_position = {0, 176}
+    local sources_groupbox_size = {title_size[1], (3 * btn_size[2] + (input_count * btn_size[2]))}
 
     graphics = {
         {
+            Type = "Header", -- This is the overall groupbox that will give the plugin a more 'contained' look
+            Text = "Extron Switcher",
+            HTextAlign = "Center",
+            Color = Colors.extron_blue,
+            FontSize = 16,
+            --StrokeColor = Colors.Black,
+            --StrokeWidth = 1,
+            Position = {0, 0},
+            Size = title_size
+        },
+        {
             Type = "GroupBox", -- This is the overall groupbox that will give the plugin a more 'contained' look
-            Text = "Info",
+            Text = "Status",
             HTextAlign = "Left",
             Fill = Colors.White,
             CornerRadius = 8,
-            StrokeColor = Colors.Black,
+            StrokeColor = Colors.extron_blue,
+            Color = Colors.extron_blue,
             StrokeWidth = 1,
-            Position = {0, 0},
-            Size = {224, 128}
+            Position = {0,title_size[2]},
+            Size = {title_size[1], 5*btn_size[2]}
         },
         {
             Type = "Text",
@@ -192,8 +217,8 @@ function GetControlLayout(props)
             FontStyle = "Bold",
             HTextAlign = "Right",
             Color = Colors.Black,
-            Position = {0, 0},
-            Size = {100, 20}
+            Position = {0, title_size[2]+(0.5*btn_size[2])},
+            Size = {3*btn_size[1], btn_size[2]}
         },
         {
             Type = "Text",
@@ -203,8 +228,8 @@ function GetControlLayout(props)
             FontStyle = "Bold",
             HTextAlign = "Right",
             Color = Colors.Black,
-            Position = {0, 20},
-            Size = {100, 20}
+            Position = {0, title_size[2]+(1.5*btn_size[2])},
+            Size = {3*btn_size[1], btn_size[2]}
         },
         {
             Type = "Text",
@@ -214,10 +239,10 @@ function GetControlLayout(props)
             FontStyle = "Bold",
             HTextAlign = "Right",
             Color = Colors.Black,
-            Position = {0, 40},
-            Size = {100, 20}
+            Position = {0, title_size[2]+(2.5*btn_size[2])},
+            Size = {3*btn_size[1], btn_size[2]}
         },
-        {
+        --[[{
             Type = "Text",
             Text = "Part Number:",
             Font = "Roboto",
@@ -227,17 +252,17 @@ function GetControlLayout(props)
             Color = Colors.Black,
             Position = {0, 60},
             Size = {100, 20}
-        },
+        },]]
         {
             Type = "Text",
-            Text = "Software:",
+            Text = "Firmware:",
             Font = "Roboto",
             FontSize = 12,
             FontStyle = "Bold",
             HTextAlign = "Right",
             Color = Colors.Black,
-            Position = {0, 80},
-            Size = {100, 20}
+            Position = {0, title_size[2]+(3.5*btn_size[2])},
+            Size = {3*btn_size[1], btn_size[2]}
         },
         {
             Type = "GroupBox",
@@ -245,7 +270,8 @@ function GetControlLayout(props)
             HTextAlign = "Left",
             Fill = Colors.White,
             CornerRadius = 8,
-            StrokeColor = Colors.Black,
+            StrokeColor = Colors.extron_blue,
+            Color = Colors.extron_blue,
             StrokeWidth = 1,
             Position = sources_groupbox_position,
             Size = sources_groupbox_size
@@ -276,33 +302,91 @@ function GetControlLayout(props)
     layout["online"] = {
         PrettyName = "System~Online",
         Style = "Indicator",
+        Margin = 4,
         Color = {0, 255, 0},
-        Position = {100, 00},
-        Size = {20, 20}
+        Position = {3*btn_size[1], title_size[2]+(0.5*btn_size[2])},
+        Size = {btn_size[2], btn_size[2]}
     }
     layout["ip_address"] = {
         PrettyName = "System~IP Address",
         Style = "TextBox",
-        Position = {100, 20},
-        Size = {100, 20}
+        Position = {3*btn_size[1], title_size[2]+(1.5*btn_size[2])},
+        Size = {3*btn_size[1], btn_size[2]}
     }
     layout["model"] = {
         PrettyName = "System~Model Name",
         Style = "Text",
-        Position = {100, 40},
-        Size = {100, 20}
+        Position = {3*btn_size[1], title_size[2]+(2.5*btn_size[2])},
+        Size = {3*btn_size[1], btn_size[2]}
     }
-    layout["part_no"] = {
+    --[[layout["part_no"] = {
         PrettyName = "System~Part Number",
         Style = "Text",
         Position = {100, 60},
         Size = {100, 20}
-    }
+    }]]
     layout["firmware_version"] = {
         PrettyName = "System~Firmware Version",
         Style = "Text",
-        Position = {100, 80},
-        Size = {100, 20}
+        Position = {3*btn_size[1], title_size[2]+(3.5*btn_size[2])},
+        Size = {3*btn_size[1], btn_size[2]}
+    }
+    layout["output_1"] = {
+        PrettyName = string.format("Active Source"),
+        Style = "Text",
+        Position = {
+            (sources_groupbox_position[1] + 2 * btn_size[1]),
+            (sources_groupbox_position[2] + 0.5 * btn_size[2] + btn_size[2])
+        },
+        Size = btn_size
+    }
+    layout["av_mute"] = {
+        PrettyName = string.format("AV Mute"),
+        Style = "Button",
+        Legend = "AV Mute",
+        Color = {223, 0, 36},
+        Margin = 1,
+        Position = {
+            (sources_groupbox_position[1] + 4 * btn_size[1]),
+            (sources_groupbox_position[2] + 1.5 * btn_size[2])
+        },
+        Size = {2*btn_size[1], btn_size[2]}
+    }
+    layout["video_mute"] = {
+        PrettyName = string.format("Video Mute"),
+        Style = "Button",
+        Legend = "Video Mute",
+        Color = {223, 0, 36},
+        Margin = 1,
+        Position = {
+            (sources_groupbox_position[1] + 4 * btn_size[1]),
+            (sources_groupbox_position[2] + 2.5 * btn_size[2])
+        },
+        Size = btn_size
+    }
+    layout["audio_mute"] = {
+        PrettyName = string.format("Audio Mute"),
+        Style = "Button",
+        Legend = "Audio Mute",
+        Color = {223, 0, 36},
+        Margin = 1,
+        Position = {
+            (sources_groupbox_position[1] + 5 * btn_size[1]),
+            (sources_groupbox_position[2] + 2.5 * btn_size[2])
+        },
+        Size = btn_size
+    }
+    layout["sync_mute"] = {
+        PrettyName = string.format("Sync Mute"),
+        Style = "Button",
+        Legend = "Sync Mute",
+        Color = {223, 0, 36},
+        Margin = 1,
+        Position = {
+            (sources_groupbox_position[1] + 4 * btn_size[1]),
+            (sources_groupbox_position[2] + 3.5 * btn_size[2])
+        },
+        Size = {2*btn_size[1], btn_size[2]}
     }
     -- Source Ports
     for s = 1, input_count do
@@ -319,9 +403,10 @@ function GetControlLayout(props)
         }
         -- Source Signal
         layout["input_signal " .. s] = {
-            PrettyName = string.format("Input%02i Signal", s),
+            PrettyName = string.format("Input %02i Signal", s),
             Style = "Indicator",
             Color = {0, 255, 0},
+            Margin = 4,
             Position = {
                 (sources_groupbox_position[1] + (btn_size[1] - btn_size[2]) / 2),
                 (sources_groupbox_position[2] + 0.5 * btn_size[2] + (s + 1) * btn_size[2])
@@ -329,28 +414,6 @@ function GetControlLayout(props)
             Size = {btn_size[2], btn_size[2]}
         }
     end
-
-    -- Active Source
-    layout["output_1"] = {
-        PrettyName = string.format("Active Source"),
-        Style = "Text",
-        Position = {
-            (sources_groupbox_position[1] + 2 * btn_size[1]),
-            (sources_groupbox_position[2] + 0.5 * btn_size[2] + btn_size[2])
-        },
-        Size = btn_size
-    }
-    layout["video_mute"] = {
-        PrettyName = string.format("AV Mute"),
-        Style = "Button",
-        Legend = "Mute",
-        Color = {223, 0, 36},
-        Position = {
-            (sources_groupbox_position[1] + 2 * btn_size[1]),
-            (sources_groupbox_position[2] + 0.5 * btn_size[2])
-        },
-        Size = btn_size
-    }
     return layout, graphics
 end
 
@@ -366,6 +429,19 @@ end
 
 function switch_command(inp) -- Potentially add an if statement if a toggle for audio link is implemented
     fnSend(inp .. "!")
+end
+
+function mute_feedback()
+    if Controls["video_mute"].Boolean and Controls["audio_mute"].Boolean then
+        Controls["av_mute"].Boolean = true
+    else
+        Controls["av_mute"].Boolean = false
+    end
+    if Controls["video_mute"].Boolean then 
+        Controls["sync_mute"].Boolean = false
+    elseif Controls["sync_mute"].Boolean then
+        Controls["video_mute"].Boolean = false
+    end
 end
 
 if Controls then
@@ -402,7 +478,7 @@ if Controls then
     function fnInitPoll(activate)
         timerPoll:Stop()
         if activate == true then
-            timerPoll:Start(10)
+            timerPoll:Start(5)
         end
     end
 
@@ -429,24 +505,26 @@ if Controls then
     -- Setup Utility Callbacks as required
     conn.Connected = function(conn)
         print("TCP socket is Connected")
-        --for i = 1, max_sources do
-            --Controls["input_signal " .. i].Value = false
-        --end
+        Controls["ip_address"].Value = 0
         -- Set a timer to wait for connection to establish
         Timer.CallAfter(fnInit, 1)
     end
     conn.Reconnect = function(conn)
+        Controls["ip_address"].Value = 5
         print("TCP socket is Reconnecting")
     end
     conn.Closed = function(conn)
+        Controls["ip_address"].Value = 3
         print("TCP socket was closed by the remote end")
         fnInitPoll(false)
     end
     conn.Error = function(conn, err)
+        Controls["ip_address"].Value = 2
         print("TCP socket had an error ::")
         print(err)
     end
     conn.Timeout = function(conn, err)
+        Controls["ip_address"].Value = 2
         print("TCP socket had an timeout ::")
         print(err)
     end
@@ -457,8 +535,8 @@ if Controls then
         conn:Connect(Extron.Host, Extron.Port)
         print("TCP socket is Connecting")
         -- Set IP address value
-        if Controls.ip_address then
-            Controls.ip_address.String = Extron.Host .. ":" .. Extron.Port
+        if Controls["ip_address"] then
+            Controls["ip_address"].String = Extron.Host .. ":" .. Extron.Port
         end
     end
 
@@ -497,7 +575,15 @@ if Controls then
                 -- Start Polling
                 fnPoll()
             elseif line:sub(1, 5) == "Inf01" then
-                Controls.model.String = line:sub(7, -1)
+                local model_name = line:sub(7, -1)
+                local model_no = string.match(model_name, "SW(%d+)")
+                --local model_no = string.match(Controls["model"].String, "SW(%d+)")
+                if model_no == string.sub(Properties["Model"].Value, 3,3) then
+                    Controls["model"].Value = 0
+                else
+                    Controls["model"].Value = 1
+                end
+                Controls["model"].String = model_name
             elseif line:sub(1, 5) == "Ver01" then
                 Controls.firmware_version.String = line:sub(7, -1)
             elseif line:sub(1, 3) == "Sig" then
@@ -505,10 +591,13 @@ if Controls then
                 for p, data in ipairs(split(line:sub(4, -3), " ")) do
                     Controls["input_signal"][p].Value = (data == "1")
                 end
-            --elseif line:sub(1, 3) == "Vmt" then
-                --Controls["video_mute"].Boolean = tonumber(line:sub(4, 4)) == 1
-            --elseif line:sub(1,3) == "Amt" then
-                --Controls["audio_mute"].Boolean = line:sub(4,4)
+            elseif line:sub(1, 3) == "Vmt" then
+                Controls["video_mute"].Boolean = tonumber(line:sub(4, 4)) == 1
+                Controls["sync_mute"].Boolean = tonumber(line:sub(4, 4)) == 2
+                mute_feedback()
+            elseif line:sub(1,3) == "Amt" then
+                Controls["audio_mute"].Boolean = tonumber(line:sub(4, 4)) == 1
+                mute_feedback()
             elseif line:sub(1, 3) == "Sig" then
                 -- Split up the Signals
                 for p, data in ipairs(split(line:sub(4, -3), " ")) do
@@ -523,7 +612,9 @@ if Controls then
                 switcher_feedback(inp)
                 --Controls["autoswitch_mode"].Boolean = auto =="1"
                 Controls["video_mute"].Boolean = vmt == "1"
+                Controls["sync_mute"].Boolean = vmt == "2"
                 Controls["audio_mute"].Boolean = amt == "1"
+                mute_feedback()
             elseif line == "E01" then
                 print("Error: Invalid input channel (out of range)")
             elseif line == "E06" then
@@ -551,9 +642,32 @@ if Controls then
     Controls["output_1"].EventHandler = function()
         switch_command(Controls["output_1"].String)
     end
+    Controls["av_mute"].EventHandler = function()
+        if Controls["av_mute"].Boolean then
+            fnSend("1B")
+            fnSend("1Z")
+        else
+            fnSend("0B")
+            fnSend("0Z")
+        end
+    end
     Controls["video_mute"].EventHandler = function()
         if Controls["video_mute"].Boolean then
             fnSend("1B")
+        else
+            fnSend("0B")
+        end
+    end
+    Controls["audio_mute"].EventHandler = function()
+        if Controls["audio_mute"].Boolean then
+            fnSend("1Z")
+        else
+            fnSend("0Z")
+        end
+    end
+    Controls["sync_mute"].EventHandler = function()
+        if Controls["sync_mute"].Boolean then
+            fnSend("2B")
         else
             fnSend("0B")
         end
