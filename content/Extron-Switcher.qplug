@@ -199,23 +199,22 @@ function GetControlLayout(props)
 
     local title_size = {224,32}
     local btn_size = {32, 24}
-    local switcher_groupbox_position = {0, 176}
+    local status_groupbox_size = {title_size[1], 5*btn_size[2]}
+    local switcher_groupbox_position = {0, title_size[2] + status_groupbox_size[2] + (0.5 * btn_size[2])}
     local sources_groupbox_size = {title_size[1], (3 * btn_size[2] + (input_count * btn_size[2]))}
 
     graphics = {
         {
-            Type = "Header", -- This is the overall groupbox that will give the plugin a more 'contained' look
+            Type = "Header",
             Text = "Extron Switcher",
             HTextAlign = "Center",
             Color = Colors.extron_blue,
             FontSize = 16,
-            --StrokeColor = Colors.Black,
-            --StrokeWidth = 1,
             Position = {0, 0},
             Size = title_size
         },
         {
-            Type = "GroupBox", -- This is the overall groupbox that will give the plugin a more 'contained' look
+            Type = "GroupBox",
             Text = "Status",
             HTextAlign = "Left",
             Fill = Colors.White,
@@ -224,7 +223,7 @@ function GetControlLayout(props)
             Color = Colors.extron_blue,
             StrokeWidth = 1,
             Position = {0,title_size[2]},
-            Size = {title_size[1], 5*btn_size[2]}
+            Size = status_groupbox_size
         },
         {
             Type = "Text",
@@ -476,33 +475,6 @@ function GetControlLayout(props)
     return layout, graphics
 end
 
-function switcher_feedback(inp)
-    Controls["switcher_output"].String = inp
-    for i = 1, max_sources do
-        Controls["input_select_" .. i].Boolean = false
-    end
-    if inp ~= "0" then
-        Controls["input_select_" .. inp].Boolean = true
-    end
-end
-
-function switch_command(inp) -- Potentially add an if statement if a toggle for audio link is implemented
-    fnSend(inp .. "!")
-end
-
-function mute_feedback()
-    if Controls["video_mute"].Boolean and Controls["audio_mute"].Boolean then
-        Controls["av_mute"].Boolean = true
-    else
-        Controls["av_mute"].Boolean = false
-    end
-    if Controls["video_mute"].Boolean then 
-        Controls["sync_mute"].Boolean = false
-    elseif Controls["sync_mute"].Boolean then
-        Controls["video_mute"].Boolean = false
-    end
-end
-
 if Controls then
     -- Local Structure for holding State
     Extron = {
@@ -564,6 +536,33 @@ if Controls then
         fnSend(string.char(27) .. "3CV" .. string.char(10)) -- Set Verbose Mode to full comms
         fnSend("X") -- Get Front panel lock status
         fnSend(string.char(27) .. "CN" .. string.char(10)) -- Get device name
+    end
+
+    function switcher_feedback(inp)
+        Controls["switcher_output"].String = inp
+        for i = 1, max_sources do
+            Controls["input_select_" .. i].Boolean = false
+        end
+        if inp ~= "0" then
+            Controls["input_select_" .. inp].Boolean = true
+        end
+    end
+    
+    function switch_command(inp) -- Potentially add an if statement if a toggle for audio link is implemented
+        fnSend(inp .. "!")
+    end
+    
+    function mute_feedback()
+        if Controls["video_mute"].Boolean and Controls["audio_mute"].Boolean then
+            Controls["av_mute"].Boolean = true
+        else
+            Controls["av_mute"].Boolean = false
+        end
+        if Controls["video_mute"].Boolean then 
+            Controls["sync_mute"].Boolean = false
+        elseif Controls["sync_mute"].Boolean then
+            Controls["video_mute"].Boolean = false
+        end
     end
 
     -- Setup Utility Callbacks as required
