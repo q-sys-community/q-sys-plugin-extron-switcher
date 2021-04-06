@@ -157,14 +157,6 @@ function GetControls(props)
             PinStyle = "Both",
             UserPin = true
         }
-        --[[{
-            Name = "input_signal",
-            ControlType = "Indicator",
-            IndicatorType = "Led",
-            PinStyle = "Output",
-            Count = max_sources,
-            UserPin = true
-        }]]
     }
     for s = 1, max_sources do
         table.insert(
