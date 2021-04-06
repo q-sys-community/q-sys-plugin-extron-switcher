@@ -156,15 +156,15 @@ function GetControls(props)
             ButtonType = "Toggle",
             PinStyle = "Both",
             UserPin = true
-        },
-        {
+        }
+        --[[{
             Name = "input_signal",
             ControlType = "Indicator",
             IndicatorType = "Led",
             PinStyle = "Output",
             Count = max_sources,
             UserPin = true
-        }
+        }]]
     }
     for s = 1, max_sources do
         table.insert(
@@ -174,6 +174,16 @@ function GetControls(props)
                 ControlType = "Button",
                 ButtonType = "Toggle",
                 PinStyle = "Both",
+                UserPin = true
+            }
+        )
+        table.insert(
+            ctls,
+            {
+                Name = "input_signal_" .. s,
+                ControlType = "Indicator",
+                IndicatorType = "Led",
+                PinStyle = "Output",
                 UserPin = true
             }
         )
@@ -197,9 +207,9 @@ function GetControlLayout(props)
 
     input_count = string.match(props["Model"].Value, "SW(%d+)")
 
-    local title_size = {224,32}
+    local title_size = {224, 32}
     local btn_size = {32, 24}
-    local status_groupbox_size = {title_size[1], 5*btn_size[2]}
+    local status_groupbox_size = {title_size[1], 5 * btn_size[2]}
     local switcher_groupbox_position = {0, title_size[2] + status_groupbox_size[2] + (0.5 * btn_size[2])}
     local sources_groupbox_size = {title_size[1], (3 * btn_size[2] + (input_count * btn_size[2]))}
 
@@ -222,7 +232,7 @@ function GetControlLayout(props)
             StrokeColor = Colors.extron_blue,
             Color = Colors.extron_blue,
             StrokeWidth = 1,
-            Position = {0,title_size[2]},
+            Position = {0, title_size[2]},
             Size = status_groupbox_size
         },
         {
@@ -233,8 +243,8 @@ function GetControlLayout(props)
             FontStyle = "Bold",
             HTextAlign = "Right",
             Color = Colors.Black,
-            Position = {0, title_size[2]+(0.5*btn_size[2])},
-            Size = {3*btn_size[1], btn_size[2]}
+            Position = {0, title_size[2] + (0.5 * btn_size[2])},
+            Size = {3 * btn_size[1], btn_size[2]}
         },
         {
             Type = "Text",
@@ -244,8 +254,8 @@ function GetControlLayout(props)
             FontStyle = "Bold",
             HTextAlign = "Right",
             Color = Colors.Black,
-            Position = {0, title_size[2]+(1.5*btn_size[2])},
-            Size = {3*btn_size[1], btn_size[2]}
+            Position = {0, title_size[2] + (1.5 * btn_size[2])},
+            Size = {3 * btn_size[1], btn_size[2]}
         },
         {
             Type = "Text",
@@ -255,8 +265,8 @@ function GetControlLayout(props)
             FontStyle = "Bold",
             HTextAlign = "Right",
             Color = Colors.Black,
-            Position = {0, title_size[2]+(2.5*btn_size[2])},
-            Size = {3*btn_size[1], btn_size[2]}
+            Position = {0, title_size[2] + (2.5 * btn_size[2])},
+            Size = {3 * btn_size[1], btn_size[2]}
         },
         --[[{
             Type = "Text",
@@ -288,8 +298,8 @@ function GetControlLayout(props)
             FontStyle = "Bold",
             HTextAlign = "Right",
             Color = Colors.Black,
-            Position = {0, title_size[2]+(3.5*btn_size[2])},
-            Size = {3*btn_size[1], btn_size[2]}
+            Position = {0, title_size[2] + (3.5 * btn_size[2])},
+            Size = {3 * btn_size[1], btn_size[2]}
         },
         {
             Type = "GroupBox",
@@ -308,14 +318,17 @@ function GetControlLayout(props)
             Text = "Autoswitch Mode:",
             FontSize = 10,
             HTextAlign = "Right",
-            Position = {switcher_groupbox_position[1]+3*btn_size[1], switcher_groupbox_position[2]},
-            Size = {3*btn_size[1], btn_size[2]}
+            Position = {switcher_groupbox_position[1] + 3 * btn_size[1], switcher_groupbox_position[2]},
+            Size = {3 * btn_size[1], btn_size[2]}
         },
         {
             Type = "Text",
             Text = "Signal",
             FontSize = 10,
-            Position = {switcher_groupbox_position[1], (switcher_groupbox_position[2] + 0.5 * btn_size[2] + btn_size[2])},
+            Position = {
+                switcher_groupbox_position[1],
+                (switcher_groupbox_position[2] + 0.5 * btn_size[2] + btn_size[2])
+            },
             Size = btn_size
         }
     }
@@ -339,7 +352,7 @@ function GetControlLayout(props)
         Style = "Indicator",
         Margin = 4,
         Color = {0, 255, 0},
-        Position = {3*btn_size[1], title_size[2]+(0.5*btn_size[2])},
+        Position = {3 * btn_size[1], title_size[2] + (0.5 * btn_size[2])},
         Size = {btn_size[2], btn_size[2]}
     }
     layout["front_panel_lock"] = {
@@ -348,20 +361,20 @@ function GetControlLayout(props)
         Legend = "Front Panel Lock",
         Margin = 1,
         Color = {223, 0, 36},
-        Position = {4*btn_size[1], title_size[2]+(0.5*btn_size[2])},
-        Size = {2*btn_size[1], btn_size[2]}
+        Position = {4 * btn_size[1], title_size[2] + (0.5 * btn_size[2])},
+        Size = {2 * btn_size[1], btn_size[2]}
     }
     layout["ip_address"] = {
         PrettyName = "System~IP Address",
         Style = "TextBox",
-        Position = {3*btn_size[1], title_size[2]+(1.5*btn_size[2])},
-        Size = {3*btn_size[1], btn_size[2]}
+        Position = {3 * btn_size[1], title_size[2] + (1.5 * btn_size[2])},
+        Size = {3 * btn_size[1], btn_size[2]}
     }
     layout["model"] = {
         PrettyName = "System~Model Name",
         Style = "Text",
-        Position = {3*btn_size[1], title_size[2]+(2.5*btn_size[2])},
-        Size = {3*btn_size[1], btn_size[2]}
+        Position = {3 * btn_size[1], title_size[2] + (2.5 * btn_size[2])},
+        Size = {3 * btn_size[1], btn_size[2]}
     }
     --[[layout["part_no"] = {
         PrettyName = "System~Part Number",
@@ -378,15 +391,15 @@ function GetControlLayout(props)
     layout["device_name"] = {
         PrettyName = "System~Device Name",
         Style = "Text",
-        Position = {3*btn_size[1], title_size[2]+(3.5*btn_size[2])},
-        Size = {3*btn_size[1], btn_size[2]}
+        Position = {3 * btn_size[1], title_size[2] + (3.5 * btn_size[2])},
+        Size = {3 * btn_size[1], btn_size[2]}
     }
     layout["autoswitch_mode"] = {
         PrettyName = "Switcher~Autoswitch Mode",
         Style = "Indicator",
         Margin = 4,
         Color = {0, 255, 0},
-        Position = {6*btn_size[1], switcher_groupbox_position[2]},
+        Position = {6 * btn_size[1], switcher_groupbox_position[2]},
         Size = {btn_size[2], btn_size[2]}
     }
     layout["switcher_output"] = {
@@ -408,7 +421,7 @@ function GetControlLayout(props)
             (switcher_groupbox_position[1] + 4 * btn_size[1]),
             (switcher_groupbox_position[2] + 1.5 * btn_size[2])
         },
-        Size = {2*btn_size[1], btn_size[2]}
+        Size = {2 * btn_size[1], btn_size[2]}
     }
     layout["video_mute"] = {
         PrettyName = "Mute~" .. string.format("Video Mute"),
@@ -444,7 +457,7 @@ function GetControlLayout(props)
             (switcher_groupbox_position[1] + 4 * btn_size[1]),
             (switcher_groupbox_position[2] + 3.5 * btn_size[2])
         },
-        Size = {2*btn_size[1], btn_size[2]}
+        Size = {2 * btn_size[1], btn_size[2]}
     }
     -- Source Ports
     for s = 1, input_count do
@@ -460,7 +473,7 @@ function GetControlLayout(props)
             Size = btn_size
         }
         -- Source Signal
-        layout["input_signal " .. s] = {
+        layout["input_signal_" .. s] = {
             PrettyName = "Signal Presence~" .. string.format("Input %1i Signal", s),
             Style = "Indicator",
             Color = {0, 255, 0},
@@ -547,18 +560,18 @@ if Controls then
             Controls["input_select_" .. inp].Boolean = true
         end
     end
-    
+
     function switch_command(inp) -- Potentially add an if statement if a toggle for audio link is implemented
         fnSend(inp .. "!")
     end
-    
+
     function mute_feedback()
         if Controls["video_mute"].Boolean and Controls["audio_mute"].Boolean then
             Controls["av_mute"].Boolean = true
         else
             Controls["av_mute"].Boolean = false
         end
-        if Controls["video_mute"].Boolean then 
+        if Controls["video_mute"].Boolean then
             Controls["sync_mute"].Boolean = false
         elseif Controls["sync_mute"].Boolean then
             Controls["video_mute"].Boolean = false
@@ -637,7 +650,7 @@ if Controls then
                 local model_name = line:sub(7, -1)
                 local model_no = string.match(model_name, "SW(%d+)")
                 --local model_no = string.match(Controls["model"].String, "SW(%d+)")
-                if model_no == string.sub(Properties["Model"].Value, 3,3) then
+                if model_no == string.sub(Properties["Model"].Value, 3, 3) then
                     Controls["model"].Value = 0
                 else
                     Controls["model"].Value = 1
@@ -648,36 +661,36 @@ if Controls then
             elseif line:sub(1, 3) == "Sig" then
                 -- Split up the Signals
                 for p, data in ipairs(split(line:sub(4, -3), " ")) do
-                    Controls["input_signal"][p].Value = (data == "1")
+                    Controls["input_signal_" .. p].Value = (data == "1")
                 end
             elseif line:sub(1, 3) == "Vmt" then
                 Controls["video_mute"].Boolean = tonumber(line:sub(4, 4)) == 1
                 Controls["sync_mute"].Boolean = tonumber(line:sub(4, 4)) == 2
                 mute_feedback()
-            elseif line:sub(1,3) == "Amt" then
+            elseif line:sub(1, 3) == "Amt" then
                 Controls["audio_mute"].Boolean = tonumber(line:sub(4, 4)) == 1
                 mute_feedback()
             elseif line:sub(1, 3) == "Sig" then
                 -- Split up the Signals
                 for p, data in ipairs(split(line:sub(4, -3), " ")) do
-                    Controls["input_signal " .. p].Value = (data == "1")
+                    Controls["input_signal_" .. p].Value = (data == "1")
                 end
-                print("Output active: " .. line:sub(-1,-1))
+                print("Output active: " .. line:sub(-1, -1))
             elseif string.find(line, "In%d+ All") ~= nil then
                 local inp = string.match(line, "In(%d+) All")
                 switcher_feedback(inp)
             elseif string.find(line, "In%d+ Ausw%d+ Afmt%d+ Vmt%d+") then
                 local inp, ausw, amt, vmt = string.match(line, "In(%d+) Ausw(%d+) Afmt(%d+) Vmt(%d+)")
                 switcher_feedback(inp)
-                Controls["autoswitch_mode"].Boolean = ausw =="1"
+                Controls["autoswitch_mode"].Boolean = ausw == "1"
                 Controls["video_mute"].Boolean = vmt == "1"
                 Controls["sync_mute"].Boolean = vmt == "2"
                 Controls["audio_mute"].Boolean = amt == "1"
                 mute_feedback()
-            elseif line:sub(1,3) == "Ipn" then
-                Controls["device_name"].String = line:sub(5,-1)
-            elseif line:sub(1,3) == "Exe" then
-                Controls["front_panel_lock"].Boolean = line:sub(4,4) == "1"
+            elseif line:sub(1, 3) == "Ipn" then
+                Controls["device_name"].String = line:sub(5, -1)
+            elseif line:sub(1, 3) == "Exe" then
+                Controls["front_panel_lock"].Boolean = line:sub(4, 4) == "1"
             elseif line == "E01" then
                 print("Error: Invalid input channel (out of range)")
             elseif line == "E06" then
