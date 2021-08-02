@@ -203,7 +203,7 @@ function GetControlLayout(props)
     local btn_size = {32, 24}
     local status_groupbox_size = {title_size[1], 5 * btn_size[2]}
     local switcher_groupbox_position = {0, title_size[2] + status_groupbox_size[2] + (0.5 * btn_size[2])}
-    local sources_groupbox_size = {title_size[1], (3 * btn_size[2] + (input_count * btn_size[2]))}
+    local switcher_groupbox_size = {title_size[1], (3 * btn_size[2] + (input_count * btn_size[2]))}
 
     graphics = {
         {
@@ -303,7 +303,7 @@ function GetControlLayout(props)
             Color = Colors.extron_blue,
             StrokeWidth = 1,
             Position = switcher_groupbox_position,
-            Size = sources_groupbox_size
+            Size = switcher_groupbox_size
         },
         {
             Type = "Text",
